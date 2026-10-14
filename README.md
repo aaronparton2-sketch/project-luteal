@@ -117,8 +117,9 @@ stub returns exactly what the real node returns, and says so in its first line.
 Most automation demos quietly aren't. Here's the honest split.
 
 **Genuinely real, no key needed:**
-- **Closest florist** — [OpenStreetMap](https://www.openstreetmap.org) via the Overpass API.
-  Real shops, real coordinates, free. If the shop lists an email Linda uses it, otherwise she
+- **Closest florist** — [OpenStreetMap](https://www.openstreetmap.org) via its Nominatim search.
+  Real shops, real coordinates, free, about a second. If it's slow it gives up in seconds and
+  uses your fallback florist, so the run never hangs. If the shop lists an email Linda uses it, otherwise she
   reads it off their website, otherwise she falls back to your usual florist.
 
 **Real, needs your own key or login:**
@@ -133,7 +134,7 @@ Most automation demos quietly aren't. Here's the honest split.
   exactly one comfort, one funny and one brain-off.
 - **The courier** — [Uber Direct](https://developer.uber.com/docs/deliveries/overview), Uber's real
   delivery API. Its sandbox has a robot courier that walks a delivery through every status, so
-  you can test the "on the way" trigger without a real driver. Going live needs an Uber Direct account.
+  you can test the "on the way" trigger (`pickup_complete` / `dropoff`) without a real driver. Going live needs an Uber Direct account.
 
 **No API exists, so here's the workaround:**
 - **Flo / period tracking apps** — Flo stopped writing to Apple Health in 2023. She logs her
@@ -143,7 +144,8 @@ Most automation demos quietly aren't. Here's the honest split.
   as a pickup, and Uber Direct does the delivery. The selectors are text-based; check them once
   against the site before you trust it with your card.
 - **Netflix history** — Netflix has no API. She downloads it: *Account → Profile → Viewing
-  activity → Download all*, and you drop the CSV into a Google Sheet. Linda reads the sheet's CSV link.
+  activity → Download all*, and you drop the CSV into a Google Sheet. Linda reads the sheet's CSV link
+  (*File → Share → Publish to web → CSV*). Format example: `optin/public/sample-netflix-viewing-activity.csv`.
 - **"Places the order" with the florist** — florists don't have APIs either. Ring yours once and
   leave a card on file, then "please charge the card you have on file" in the email is true.
 
@@ -174,8 +176,11 @@ Most automation demos quietly aren't. Here's the honest split.
    then read it from `https://api.telegram.org/bot<TOKEN>/getUpdates`.
 4. **Set the three webhooks**: the Shortcut posts to `linda-cycle`, and Uber Direct's webhook
    (in the Uber Direct dashboard) points at `linda-uber-status`.
-5. **Activate.**
-6. **Want to see it first?** Open the DEMO workflow and hit **Run it now**.
+5. **Swap the placeholders**: her work location (it ships pointing at a café on Oxford St,
+   Leederville), her home address for the courier, your Grill'd store address, and the Uber
+   Direct customer id, client id and secret.
+6. **Activate.**
+7. **Want to see it first?** Open the DEMO workflow and hit **Run it now**.
 
 > ⚠️ Telegram only lets a bot have one way of receiving messages. The full build's Telegram
 > trigger sets a webhook on your bot, and the demo reads replies by polling. Use a separate bot for

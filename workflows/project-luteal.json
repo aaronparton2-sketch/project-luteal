@@ -8,7 +8,7 @@
         "height": 300,
         "color": 7
       },
-      "name": "note 360196",
+      "name": "note 216451",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -34,7 +34,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  ⚙️  Linda settings. The same block sits at the start of every lane\n//  (n8n can't read a node from another lane's run), so edit all five,\n//  or move these into n8n Variables if your plan has them.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Her name',\n    phone: '+61400000000',          // only used by the courier, for the drop-off\n    telegram_chat: '123456789',     // she messages your bot once; her chat id goes here\n    work:  { name: 'her work', lat: -31.9505, lon: 115.8605 },\n    home:  { street: '1 Example St', suburb: 'Perth', state: 'WA', postcode: '6000' },\n  },\n  me:              { name: 'Your name', phone: '+61400000001', telegram_chat: '987654321' },\n  shortcut_secret: 'CHANGE-ME',         // the iPhone Shortcut sends this with every ping\n  flowers: {\n    order:            '12 pink roses',\n    card:             'Thinking of you. x',\n    deliver_by:       '4:30pm',\n    search_radius_m:  3000,\n    fallback_email:   'orders@your-florist.com.au',  // used if the closest shop lists no email\n    fallback_florist: { name: 'Your usual florist', email: 'orders@your-florist.com.au', website: '' },\n    order_inbox:      '',                            // set to your own email to test safely\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", favourite: 'Mustard & Pickled!', sides: 'Sweet Potato Chips' },\n  uber_direct: {\n    customer_id: 'YOUR_UBER_DIRECT_CUSTOMER_ID',\n    pickup: { name: \"Grill'd (your closest)\", phone: '+61800000000',\n              street: 'Store street address', suburb: 'Perth', state: 'WA', postcode: '6000' },\n  },\n  netflix_history_csv: 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv',\n};\n\n// The OpenStreetMap search for florists near her work (used by \"Find the closest florist\").\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst near = `(around:${r},${w.lat},${w.lon})`;\ncfg.osm_query = `[out:json][timeout:25];(node[\"shop\"=\"florist\"]${near};way[\"shop\"=\"florist\"]${near};);out center tags;`;\nreturn [{ json: cfg }];\n"
+        "jsCode": "// ===================================================================\n//  ⚙️  Linda settings. The same block sits at the start of every lane\n//  (n8n can't read a node from another lane's run), so edit all five,\n//  or move these into n8n Variables if your plan has them.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Her name',\n    phone: '+61400000000',          // only used by the courier, for the drop-off\n    telegram_chat: '123456789',     // she messages your bot once; her chat id goes here\n    work:  { name: 'her work (the café on Oxford St, Leederville)', lat: -31.9365, lon: 115.8418 },  // swap for hers\n    home_address: '1 Example St, Leederville WA 6007',   // where dinner gets dropped\n  },\n  me:              { name: 'Your name', phone: '+61400000001', telegram_chat: '987654321' },\n  shortcut_secret: 'CHANGE-ME',         // the iPhone Shortcut sends this with every ping\n  flowers: {\n    order:            '12 pink roses',\n    card:             'Thinking of you. x',\n    deliver_by:       '4:30pm',\n    search_radius_m:  3000,\n    fallback_email:   'orders@your-florist.com.au',  // used if the closest shop lists no email\n    fallback_florist: { name: 'Your usual florist', email: 'orders@your-florist.com.au', website: '' },\n    order_inbox:      '',                            // set to your own email to test safely\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", favourite: 'Mustard & Pickled!', sides: 'Sweet Potato Chips' },\n  uber_direct: {\n    customer_id: 'YOUR_UBER_DIRECT_CUSTOMER_ID',\n    pickup: { name: \"Grill'd (your closest)\", phone: '+61800000000',\n              address: 'Your closest Grill\\'d street address, suburb WA postcode' },\n  },\n  netflix_history_csv: 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv',\n};\n\n// The box \"Find the closest florist\" searches: her work, +/- search_radius_m.\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst dLat = r / 111320, dLon = r / (111320 * Math.cos(w.lat * Math.PI / 180));\ncfg.search_box = [w.lon - dLon, w.lat + dLat, w.lon + dLon, w.lat - dLat].map(n => n.toFixed(5)).join(',');\nreturn [{ json: cfg }];\n"
       },
       "name": "⚙️ Settings · cycle",
       "type": "n8n-nodes-base.code",
@@ -75,7 +75,7 @@
         "height": 190,
         "color": 6
       },
-      "name": "note 137077",
+      "name": "note 309544",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -104,7 +104,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  ⚙️  Linda settings. The same block sits at the start of every lane\n//  (n8n can't read a node from another lane's run), so edit all five,\n//  or move these into n8n Variables if your plan has them.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Her name',\n    phone: '+61400000000',          // only used by the courier, for the drop-off\n    telegram_chat: '123456789',     // she messages your bot once; her chat id goes here\n    work:  { name: 'her work', lat: -31.9505, lon: 115.8605 },\n    home:  { street: '1 Example St', suburb: 'Perth', state: 'WA', postcode: '6000' },\n  },\n  me:              { name: 'Your name', phone: '+61400000001', telegram_chat: '987654321' },\n  shortcut_secret: 'CHANGE-ME',         // the iPhone Shortcut sends this with every ping\n  flowers: {\n    order:            '12 pink roses',\n    card:             'Thinking of you. x',\n    deliver_by:       '4:30pm',\n    search_radius_m:  3000,\n    fallback_email:   'orders@your-florist.com.au',  // used if the closest shop lists no email\n    fallback_florist: { name: 'Your usual florist', email: 'orders@your-florist.com.au', website: '' },\n    order_inbox:      '',                            // set to your own email to test safely\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", favourite: 'Mustard & Pickled!', sides: 'Sweet Potato Chips' },\n  uber_direct: {\n    customer_id: 'YOUR_UBER_DIRECT_CUSTOMER_ID',\n    pickup: { name: \"Grill'd (your closest)\", phone: '+61800000000',\n              street: 'Store street address', suburb: 'Perth', state: 'WA', postcode: '6000' },\n  },\n  netflix_history_csv: 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv',\n};\n\n// The OpenStreetMap search for florists near her work (used by \"Find the closest florist\").\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst near = `(around:${r},${w.lat},${w.lon})`;\ncfg.osm_query = `[out:json][timeout:25];(node[\"shop\"=\"florist\"]${near};way[\"shop\"=\"florist\"]${near};);out center tags;`;\nreturn [{ json: cfg }];\n"
+        "jsCode": "// ===================================================================\n//  ⚙️  Linda settings. The same block sits at the start of every lane\n//  (n8n can't read a node from another lane's run), so edit all five,\n//  or move these into n8n Variables if your plan has them.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Her name',\n    phone: '+61400000000',          // only used by the courier, for the drop-off\n    telegram_chat: '123456789',     // she messages your bot once; her chat id goes here\n    work:  { name: 'her work (the café on Oxford St, Leederville)', lat: -31.9365, lon: 115.8418 },  // swap for hers\n    home_address: '1 Example St, Leederville WA 6007',   // where dinner gets dropped\n  },\n  me:              { name: 'Your name', phone: '+61400000001', telegram_chat: '987654321' },\n  shortcut_secret: 'CHANGE-ME',         // the iPhone Shortcut sends this with every ping\n  flowers: {\n    order:            '12 pink roses',\n    card:             'Thinking of you. x',\n    deliver_by:       '4:30pm',\n    search_radius_m:  3000,\n    fallback_email:   'orders@your-florist.com.au',  // used if the closest shop lists no email\n    fallback_florist: { name: 'Your usual florist', email: 'orders@your-florist.com.au', website: '' },\n    order_inbox:      '',                            // set to your own email to test safely\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", favourite: 'Mustard & Pickled!', sides: 'Sweet Potato Chips' },\n  uber_direct: {\n    customer_id: 'YOUR_UBER_DIRECT_CUSTOMER_ID',\n    pickup: { name: \"Grill'd (your closest)\", phone: '+61800000000',\n              address: 'Your closest Grill\\'d street address, suburb WA postcode' },\n  },\n  netflix_history_csv: 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv',\n};\n\n// The box \"Find the closest florist\" searches: her work, +/- search_radius_m.\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst dLat = r / 111320, dLon = r / (111320 * Math.cos(w.lat * Math.PI / 180));\ncfg.search_box = [w.lon - dLon, w.lat + dLat, w.lon + dLon, w.lat - dLat].map(n => n.toFixed(5)).join(',');\nreturn [{ json: cfg }];\n"
       },
       "name": "⚙️ Settings · morning",
       "type": "n8n-nodes-base.code",
@@ -222,7 +222,7 @@
         "height": 190,
         "color": 5
       },
-      "name": "note 87963",
+      "name": "note 681313",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -254,7 +254,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  ⚙️  Linda settings. The same block sits at the start of every lane\n//  (n8n can't read a node from another lane's run), so edit all five,\n//  or move these into n8n Variables if your plan has them.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Her name',\n    phone: '+61400000000',          // only used by the courier, for the drop-off\n    telegram_chat: '123456789',     // she messages your bot once; her chat id goes here\n    work:  { name: 'her work', lat: -31.9505, lon: 115.8605 },\n    home:  { street: '1 Example St', suburb: 'Perth', state: 'WA', postcode: '6000' },\n  },\n  me:              { name: 'Your name', phone: '+61400000001', telegram_chat: '987654321' },\n  shortcut_secret: 'CHANGE-ME',         // the iPhone Shortcut sends this with every ping\n  flowers: {\n    order:            '12 pink roses',\n    card:             'Thinking of you. x',\n    deliver_by:       '4:30pm',\n    search_radius_m:  3000,\n    fallback_email:   'orders@your-florist.com.au',  // used if the closest shop lists no email\n    fallback_florist: { name: 'Your usual florist', email: 'orders@your-florist.com.au', website: '' },\n    order_inbox:      '',                            // set to your own email to test safely\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", favourite: 'Mustard & Pickled!', sides: 'Sweet Potato Chips' },\n  uber_direct: {\n    customer_id: 'YOUR_UBER_DIRECT_CUSTOMER_ID',\n    pickup: { name: \"Grill'd (your closest)\", phone: '+61800000000',\n              street: 'Store street address', suburb: 'Perth', state: 'WA', postcode: '6000' },\n  },\n  netflix_history_csv: 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv',\n};\n\n// The OpenStreetMap search for florists near her work (used by \"Find the closest florist\").\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst near = `(around:${r},${w.lat},${w.lon})`;\ncfg.osm_query = `[out:json][timeout:25];(node[\"shop\"=\"florist\"]${near};way[\"shop\"=\"florist\"]${near};);out center tags;`;\nreturn [{ json: cfg }];\n"
+        "jsCode": "// ===================================================================\n//  ⚙️  Linda settings. The same block sits at the start of every lane\n//  (n8n can't read a node from another lane's run), so edit all five,\n//  or move these into n8n Variables if your plan has them.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Her name',\n    phone: '+61400000000',          // only used by the courier, for the drop-off\n    telegram_chat: '123456789',     // she messages your bot once; her chat id goes here\n    work:  { name: 'her work (the café on Oxford St, Leederville)', lat: -31.9365, lon: 115.8418 },  // swap for hers\n    home_address: '1 Example St, Leederville WA 6007',   // where dinner gets dropped\n  },\n  me:              { name: 'Your name', phone: '+61400000001', telegram_chat: '987654321' },\n  shortcut_secret: 'CHANGE-ME',         // the iPhone Shortcut sends this with every ping\n  flowers: {\n    order:            '12 pink roses',\n    card:             'Thinking of you. x',\n    deliver_by:       '4:30pm',\n    search_radius_m:  3000,\n    fallback_email:   'orders@your-florist.com.au',  // used if the closest shop lists no email\n    fallback_florist: { name: 'Your usual florist', email: 'orders@your-florist.com.au', website: '' },\n    order_inbox:      '',                            // set to your own email to test safely\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", favourite: 'Mustard & Pickled!', sides: 'Sweet Potato Chips' },\n  uber_direct: {\n    customer_id: 'YOUR_UBER_DIRECT_CUSTOMER_ID',\n    pickup: { name: \"Grill'd (your closest)\", phone: '+61800000000',\n              address: 'Your closest Grill\\'d street address, suburb WA postcode' },\n  },\n  netflix_history_csv: 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv',\n};\n\n// The box \"Find the closest florist\" searches: her work, +/- search_radius_m.\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst dLat = r / 111320, dLon = r / (111320 * Math.cos(w.lat * Math.PI / 180));\ncfg.search_box = [w.lon - dLon, w.lat + dLat, w.lon + dLon, w.lat - dLat].map(n => n.toFixed(5)).join(',');\nreturn [{ json: cfg }];\n"
       },
       "name": "⚙️ Settings · reply",
       "type": "n8n-nodes-base.code",
@@ -311,9 +311,9 @@
     },
     {
       "parameters": {
-        "url": "https://overpass.kumi.systems/api/interpreter",
+        "url": "https://nominatim.openstreetmap.org/search",
         "options": {
-          "timeout": 30000
+          "timeout": 10000
         },
         "sendHeaders": true,
         "headerParameters": {
@@ -328,8 +328,28 @@
         "queryParameters": {
           "parameters": [
             {
-              "name": "data",
-              "value": "={{ $('⚙️ Settings · reply').first().json.osm_query }}"
+              "name": "q",
+              "value": "florist"
+            },
+            {
+              "name": "format",
+              "value": "jsonv2"
+            },
+            {
+              "name": "bounded",
+              "value": "1"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "extratags",
+              "value": "1"
+            },
+            {
+              "name": "viewbox",
+              "value": "={{ $('⚙️ Settings · reply').first().json.search_box }}"
             }
           ]
         }
@@ -342,13 +362,14 @@
         1200
       ],
       "retryOnFail": true,
-      "maxTries": 4,
-      "waitBetweenTries": 3000,
-      "onError": "continueRegularOutput"
+      "maxTries": 2,
+      "waitBetweenTries": 1500,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  Closest florist to where she works, from OpenStreetMap.\n//  Free, keyless, real shops. OSM often lists the shop's email; if it\n//  doesn't, the next node reads it off the florist's own website.\n// ===================================================================\nconst cfg = $('⚙️ Settings · reply').first().json;\nconst w = cfg.her.work;\nconst rad = Math.PI / 180;\nconst km = (a, b) => {\n  const x = Math.sin((b.lat - a.lat) * rad / 2) ** 2 +\n            Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin((b.lon - a.lon) * rad / 2) ** 2;\n  return 6371 * 2 * Math.asin(Math.sqrt(x));\n};\n\nconst shops = ($input.first().json.elements || []).map(e => {\n  const t = e.tags || {};\n  const p = { lat: e.lat || (e.center && e.center.lat), lon: e.lon || (e.center && e.center.lon) };\n  return {\n    name:    t.name,\n    km:      p.lat ? +km(w, p).toFixed(2) : 999,\n    email:   t.email || t['contact:email'] || '',\n    website: t.website || t['contact:website'] || '',\n    phone:   t.phone || t['contact:phone'] || '',\n    address: [t['addr:housenumber'], t['addr:street'], t['addr:suburb']].filter(Boolean).join(' '),\n  };\n}).filter(s => s.name && s.km < 999).sort((a, b) => a.km - b.km);\n\n// OpenStreetMap down or nothing nearby? Use the florist you set up as a fallback.\nif (!shops.length) shops.push(Object.assign({ km: null, fallback: true }, cfg.flowers.fallback_florist));\nreturn [{ json: Object.assign({ florists_found: shops.length }, shops[0]) }];\n"
+        "jsCode": "// ===================================================================\n//  Closest florist to where she works, from OpenStreetMap (Nominatim).\n//  Free, keyless, real shops. OSM often lists the shop's email; if it\n//  doesn't, the next node reads it off the florist's own website.\n// ===================================================================\nconst cfg = $('⚙️ Settings · reply').first().json;\nconst w = cfg.her.work;\nconst rad = Math.PI / 180;\nconst km = (a, b) => {\n  const x = Math.sin((b.lat - a.lat) * rad / 2) ** 2 +\n            Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin((b.lon - a.lon) * rad / 2) ** 2;\n  return 6371 * 2 * Math.asin(Math.sqrt(x));\n};\n\n// n8n hands a JSON array over as one item per result\nconst shops = $input.all().map(i => i.json).filter(e => e && e.lat).map(e => {\n  const t = Object.assign({}, e.extratags || {}, e.address || {});\n  t.name = e.name;\n  const p = { lat: Number(e.lat), lon: Number(e.lon) };\n  return {\n    name:    t.name,\n    km:      p.lat ? +km(w, p).toFixed(2) : 999,\n    email:   t.email || t['contact:email'] || '',\n    website: t.website || t['contact:website'] || '',\n    phone:   t.phone || t['contact:phone'] || '',\n    address: [t['addr:housenumber'], t['addr:street'], t['addr:suburb']].filter(Boolean).join(' '),\n  };\n}).filter(s => s.name && s.km < 999).sort((a, b) => a.km - b.km);\n\nconst found = shops.length;\n// OpenStreetMap down or nothing nearby? Use the florist you set up as a fallback.\nif (!shops.length) shops.push(Object.assign({ km: null, fallback: true }, cfg.flowers.fallback_florist));\nreturn [{ json: Object.assign({ florists_found: found }, shops[0]) }];\n"
       },
       "name": "Pick the florist",
       "type": "n8n-nodes-base.code",
@@ -440,8 +461,7 @@
         "timeMin": "={{ $json.from }}",
         "timeMax": "={{ $json.to }}",
         "options": {
-          "query": "={{ $('⚙️ Settings · reply').first().json.boys_night.match }}",
-          "singleEvents": true
+          "query": "={{ $('⚙️ Settings · reply').first().json.boys_night.match }}"
         }
       },
       "name": "Find boys' night",
@@ -496,8 +516,8 @@
         },
         "eventId": "={{ $json.id }}",
         "updateFields": {
-          "start": "={{ DateTime.fromISO($json.start.dateTime).plus({ days: $('⚙️ Settings · reply').first().json.boys_night.move_days }).toISO() }}",
-          "end": "={{ DateTime.fromISO($json.end.dateTime).plus({ days: $('⚙️ Settings · reply').first().json.boys_night.move_days }).toISO() }}",
+          "start": "={{ DateTime.fromISO($json.start.dateTime || $json.start.date).plus({ days: $('⚙️ Settings · reply').first().json.boys_night.move_days }).toISO() }}",
+          "end": "={{ DateTime.fromISO($json.end.dateTime || $json.end.date).plus({ days: $('⚙️ Settings · reply').first().json.boys_night.move_days }).toISO() }}",
           "sendUpdates": "all"
         }
       },
@@ -557,12 +577,12 @@
     },
     {
       "parameters": {
-        "content": "## 3 · She replies → flowers + Friday\nHer reply to the bot lands on this Telegram trigger. **OpenStreetMap** finds the closest florist to her work (free, no key). The order is emailed to the shop. Ring them once first and leave a card on file, so *charge my card* is true. Then Google Calendar moves anything called \"boys\" this Friday a week out (the invite update emails them) and blocks the night.",
+        "content": "## 3 · She replies → flowers + Friday\nHer reply to the bot lands on this Telegram trigger. **OpenStreetMap** (Nominatim) finds the closest florist to her work (free, no key). The order is emailed to the shop. Ring them once first and leave a card on file, so *charge my card* is true. Then Google Calendar moves anything called \"boys\" this Friday a week out (the invite update emails them) and blocks the night.",
         "width": 1500,
         "height": 230,
         "color": 4
       },
-      "name": "note 148832",
+      "name": "note 457818",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -591,7 +611,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  ⚙️  Linda settings. The same block sits at the start of every lane\n//  (n8n can't read a node from another lane's run), so edit all five,\n//  or move these into n8n Variables if your plan has them.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Her name',\n    phone: '+61400000000',          // only used by the courier, for the drop-off\n    telegram_chat: '123456789',     // she messages your bot once; her chat id goes here\n    work:  { name: 'her work', lat: -31.9505, lon: 115.8605 },\n    home:  { street: '1 Example St', suburb: 'Perth', state: 'WA', postcode: '6000' },\n  },\n  me:              { name: 'Your name', phone: '+61400000001', telegram_chat: '987654321' },\n  shortcut_secret: 'CHANGE-ME',         // the iPhone Shortcut sends this with every ping\n  flowers: {\n    order:            '12 pink roses',\n    card:             'Thinking of you. x',\n    deliver_by:       '4:30pm',\n    search_radius_m:  3000,\n    fallback_email:   'orders@your-florist.com.au',  // used if the closest shop lists no email\n    fallback_florist: { name: 'Your usual florist', email: 'orders@your-florist.com.au', website: '' },\n    order_inbox:      '',                            // set to your own email to test safely\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", favourite: 'Mustard & Pickled!', sides: 'Sweet Potato Chips' },\n  uber_direct: {\n    customer_id: 'YOUR_UBER_DIRECT_CUSTOMER_ID',\n    pickup: { name: \"Grill'd (your closest)\", phone: '+61800000000',\n              street: 'Store street address', suburb: 'Perth', state: 'WA', postcode: '6000' },\n  },\n  netflix_history_csv: 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv',\n};\n\n// The OpenStreetMap search for florists near her work (used by \"Find the closest florist\").\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst near = `(around:${r},${w.lat},${w.lon})`;\ncfg.osm_query = `[out:json][timeout:25];(node[\"shop\"=\"florist\"]${near};way[\"shop\"=\"florist\"]${near};);out center tags;`;\nreturn [{ json: cfg }];\n"
+        "jsCode": "// ===================================================================\n//  ⚙️  Linda settings. The same block sits at the start of every lane\n//  (n8n can't read a node from another lane's run), so edit all five,\n//  or move these into n8n Variables if your plan has them.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Her name',\n    phone: '+61400000000',          // only used by the courier, for the drop-off\n    telegram_chat: '123456789',     // she messages your bot once; her chat id goes here\n    work:  { name: 'her work (the café on Oxford St, Leederville)', lat: -31.9365, lon: 115.8418 },  // swap for hers\n    home_address: '1 Example St, Leederville WA 6007',   // where dinner gets dropped\n  },\n  me:              { name: 'Your name', phone: '+61400000001', telegram_chat: '987654321' },\n  shortcut_secret: 'CHANGE-ME',         // the iPhone Shortcut sends this with every ping\n  flowers: {\n    order:            '12 pink roses',\n    card:             'Thinking of you. x',\n    deliver_by:       '4:30pm',\n    search_radius_m:  3000,\n    fallback_email:   'orders@your-florist.com.au',  // used if the closest shop lists no email\n    fallback_florist: { name: 'Your usual florist', email: 'orders@your-florist.com.au', website: '' },\n    order_inbox:      '',                            // set to your own email to test safely\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", favourite: 'Mustard & Pickled!', sides: 'Sweet Potato Chips' },\n  uber_direct: {\n    customer_id: 'YOUR_UBER_DIRECT_CUSTOMER_ID',\n    pickup: { name: \"Grill'd (your closest)\", phone: '+61800000000',\n              address: 'Your closest Grill\\'d street address, suburb WA postcode' },\n  },\n  netflix_history_csv: 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv',\n};\n\n// The box \"Find the closest florist\" searches: her work, +/- search_radius_m.\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst dLat = r / 111320, dLon = r / (111320 * Math.cos(w.lat * Math.PI / 180));\ncfg.search_box = [w.lon - dLon, w.lat + dLat, w.lon + dLon, w.lat - dLat].map(n => n.toFixed(5)).join(',');\nreturn [{ json: cfg }];\n"
       },
       "name": "⚙️ Settings · dinner",
       "type": "n8n-nodes-base.code",
@@ -730,7 +750,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ (() => {\n  const c = $('⚙️ Settings · dinner').first().json;\n  const addr = a => JSON.stringify({ street_address: [a.street], city: a.suburb, state: a.state,\n                                     zip_code: a.postcode, country: 'AU' });\n  return JSON.stringify({\n    pickup_name:          c.uber_direct.pickup.name,\n    pickup_address:       addr(c.uber_direct.pickup),\n    pickup_phone_number:  c.uber_direct.pickup.phone,\n    pickup_notes:         'Pickup order under ' + c.me.name + ': ' + c.comfort_order.favourite + ' + ' + c.comfort_order.sides,\n    dropoff_name:         c.her.name,\n    dropoff_address:      addr(c.her.home),\n    dropoff_phone_number: c.her.phone,\n    dropoff_notes:        'Leave at the door. She is not getting up.',\n    manifest_items:       [{ name: c.comfort_order.favourite, quantity: 1, size: 'small' },\n                           { name: c.comfort_order.sides, quantity: 1, size: 'small' }],\n    external_id:          'linda-' + $('Shark week today?').first().json.today,\n    // sandbox only: a robot courier walks it through every status\n    test_specifications:  { robo_courier_specification: { mode: 'auto' } }\n  });\n})() }}"
+        "jsonBody": "={{ (() => {\n  const c = $('⚙️ Settings · dinner').first().json;\n  return JSON.stringify({\n    pickup_name:          c.uber_direct.pickup.name,\n    pickup_address:       c.uber_direct.pickup.address,\n    pickup_phone_number:  c.uber_direct.pickup.phone,\n    pickup_notes:         'Pickup order under ' + c.me.name + ': ' + c.comfort_order.favourite + ' + ' + c.comfort_order.sides,\n    dropoff_name:         c.her.name,\n    dropoff_address:      c.her.home_address,\n    dropoff_phone_number: c.her.phone,\n    dropoff_notes:        'Leave at the door. She is not getting up.',\n    manifest_items:       [{ name: c.comfort_order.favourite, quantity: 1, size: 'small' },\n                           { name: c.comfort_order.sides, quantity: 1, size: 'small' }],\n    external_id:          'linda-' + $('Shark week today?').first().json.today,\n    // sandbox only: a robot courier walks it through every status\n    test_specifications:  { robo_courier_specification: { mode: 'auto' } }\n  });\n})() }}"
       },
       "name": "Uber Direct: book the driver",
       "type": "n8n-nodes-base.httpRequest",
@@ -781,7 +801,7 @@
         "height": 190,
         "color": 3
       },
-      "name": "note 776352",
+      "name": "note 546133",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -807,7 +827,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  ⚙️  Linda settings. The same block sits at the start of every lane\n//  (n8n can't read a node from another lane's run), so edit all five,\n//  or move these into n8n Variables if your plan has them.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Her name',\n    phone: '+61400000000',          // only used by the courier, for the drop-off\n    telegram_chat: '123456789',     // she messages your bot once; her chat id goes here\n    work:  { name: 'her work', lat: -31.9505, lon: 115.8605 },\n    home:  { street: '1 Example St', suburb: 'Perth', state: 'WA', postcode: '6000' },\n  },\n  me:              { name: 'Your name', phone: '+61400000001', telegram_chat: '987654321' },\n  shortcut_secret: 'CHANGE-ME',         // the iPhone Shortcut sends this with every ping\n  flowers: {\n    order:            '12 pink roses',\n    card:             'Thinking of you. x',\n    deliver_by:       '4:30pm',\n    search_radius_m:  3000,\n    fallback_email:   'orders@your-florist.com.au',  // used if the closest shop lists no email\n    fallback_florist: { name: 'Your usual florist', email: 'orders@your-florist.com.au', website: '' },\n    order_inbox:      '',                            // set to your own email to test safely\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", favourite: 'Mustard & Pickled!', sides: 'Sweet Potato Chips' },\n  uber_direct: {\n    customer_id: 'YOUR_UBER_DIRECT_CUSTOMER_ID',\n    pickup: { name: \"Grill'd (your closest)\", phone: '+61800000000',\n              street: 'Store street address', suburb: 'Perth', state: 'WA', postcode: '6000' },\n  },\n  netflix_history_csv: 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv',\n};\n\n// The OpenStreetMap search for florists near her work (used by \"Find the closest florist\").\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst near = `(around:${r},${w.lat},${w.lon})`;\ncfg.osm_query = `[out:json][timeout:25];(node[\"shop\"=\"florist\"]${near};way[\"shop\"=\"florist\"]${near};);out center tags;`;\nreturn [{ json: cfg }];\n"
+        "jsCode": "// ===================================================================\n//  ⚙️  Linda settings. The same block sits at the start of every lane\n//  (n8n can't read a node from another lane's run), so edit all five,\n//  or move these into n8n Variables if your plan has them.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Her name',\n    phone: '+61400000000',          // only used by the courier, for the drop-off\n    telegram_chat: '123456789',     // she messages your bot once; her chat id goes here\n    work:  { name: 'her work (the café on Oxford St, Leederville)', lat: -31.9365, lon: 115.8418 },  // swap for hers\n    home_address: '1 Example St, Leederville WA 6007',   // where dinner gets dropped\n  },\n  me:              { name: 'Your name', phone: '+61400000001', telegram_chat: '987654321' },\n  shortcut_secret: 'CHANGE-ME',         // the iPhone Shortcut sends this with every ping\n  flowers: {\n    order:            '12 pink roses',\n    card:             'Thinking of you. x',\n    deliver_by:       '4:30pm',\n    search_radius_m:  3000,\n    fallback_email:   'orders@your-florist.com.au',  // used if the closest shop lists no email\n    fallback_florist: { name: 'Your usual florist', email: 'orders@your-florist.com.au', website: '' },\n    order_inbox:      '',                            // set to your own email to test safely\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", favourite: 'Mustard & Pickled!', sides: 'Sweet Potato Chips' },\n  uber_direct: {\n    customer_id: 'YOUR_UBER_DIRECT_CUSTOMER_ID',\n    pickup: { name: \"Grill'd (your closest)\", phone: '+61800000000',\n              address: 'Your closest Grill\\'d street address, suburb WA postcode' },\n  },\n  netflix_history_csv: 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv',\n};\n\n// The box \"Find the closest florist\" searches: her work, +/- search_radius_m.\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst dLat = r / 111320, dLon = r / (111320 * Math.cos(w.lat * Math.PI / 180));\ncfg.search_box = [w.lon - dLon, w.lat + dLat, w.lon + dLon, w.lat - dLat].map(n => n.toFixed(5)).join(',');\nreturn [{ json: cfg }];\n"
       },
       "name": "⚙️ Settings · movies",
       "type": "n8n-nodes-base.code",
@@ -819,7 +839,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Uber Direct posts every status change. \"On the way\" = pickup_complete\n// (the driver has the food and is heading to her).\nconst b = $('Uber Direct: status update').first().json.body || {};\nconst s = $getWorkflowStaticData('global');\nconst go = b.kind === 'event.delivery_status' && b.status === 'pickup_complete'\n        && b.delivery_id === s.delivery_id && s.movies_for !== b.delivery_id;\nif (go) s.movies_for = b.delivery_id;\nreturn [{ json: { go, status: b.status || null } }];\n"
+        "jsCode": "// Uber Direct posts every status change. \"On the way\" = pickup_complete or\n// dropoff (the driver has the food and is heading to her). Whichever lands first fires.\nconst b = $('Uber Direct: status update').first().json.body || {};\nconst s = $getWorkflowStaticData('global');\nconst id = b.delivery_id || (b.data && b.data.id);\nconst onTheWay = ['pickup_complete', 'dropoff'].includes(b.status);\nconst go = b.kind === 'event.delivery_status' && onTheWay\n        && id === s.delivery_id && s.movies_for !== id;\nif (go) s.movies_for = id;\nreturn [{ json: { go, status: b.status || null } }];\n"
       },
       "name": "Driver on the way?",
       "type": "n8n-nodes-base.code",
@@ -1014,12 +1034,12 @@
     },
     {
       "parameters": {
-        "content": "## 5 · Driver's on the way → movies\nUber Direct posts every status to this webhook; **pickup_complete** is the moment the driver leaves with the food. **Apify** scrapes what's trending on Netflix AU from JustWatch, her Netflix *Viewing activity* CSV (Netflix has no API) knocks out what she's seen, and **Linda** (Claude) picks one comfort, one funny, one brain-off.",
+        "content": "## 5 · Driver's on the way → movies\nUber Direct posts every status to this webhook; **pickup_complete / dropoff** is the moment the driver leaves with the food. **Apify** scrapes what's trending on Netflix AU from JustWatch, her Netflix *Viewing activity* CSV (Netflix has no API) knocks out what she's seen, and **Linda** (Claude) picks one comfort, one funny, one brain-off.",
         "width": 1300,
         "height": 190,
         "color": 2
       },
-      "name": "note 14853",
+      "name": "note 57450",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
