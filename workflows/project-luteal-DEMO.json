@@ -1,0 +1,881 @@
+{
+  "name": "LINDA - FILMING (one click, end to end)",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Run it now",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        140,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "linda-filming-7f3k2",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "name": "Webhook (test)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        140,
+        560
+      ],
+      "webhookId": "linda-filming-7f3k2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  ⚙️  Everything Linda needs to know. Edit this node, nothing else.\n//  FILMING: her Telegram chat is mine, so \"Thinking of you\" lands on\n//  my phone and I reply to it on camera. Swap her chat id in for real.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Pookie',\n    telegram_chat: 'YOUR_TELEGRAM_CHAT_ID',\n    work:  { name: 'her work', lat: -31.9505, lon: 115.8605 },\n  },\n  me:          { name: 'Aaron', telegram_chat: 'YOUR_TELEGRAM_CHAT_ID' },\n  flowers: {\n    order:           '12 pink roses',\n    card:            'Thinking of you. x',\n    deliver_by:      '4:30pm',\n    search_radius_m: 2500,\n    order_inbox:     'you@example.com',   // FILMING: the order comes to me, not the shop\n    fallback_florist: { name: 'Your usual florist', email: '', website: '' },\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", items: ['Mustard & Pickled!', 'Sweet Potato Chips'], at: '5:30pm' },\n  movies:        { country: 'AU', service: 'Netflix' },\n};\n\n// The OpenStreetMap search for florists near her work (used by \"Find the closest florist\").\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst near = `(around:${r},${w.lat},${w.lon})`;\ncfg.osm_query = `[out:json][timeout:25];(node[\"shop\"=\"florist\"]${near};way[\"shop\"=\"florist\"]${near};);out center tags;`;\nreturn [{ json: cfg }];\n"
+      },
+      "name": "⚙️ Linda settings",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  📱 What her iPhone Shortcut posts when she plugs her phone in.\n//  Apple Health > Cycle Tracking > Find Health Samples (Menstrual Flow).\n//  FILMING STUB: in the full build this is the \"Her cycle\" webhook.\n//  Same fields. Her last period started 14 days ago.\n// ===================================================================\nconst DAY = 86400000;\nconst today = Date.parse(new Date().toLocaleDateString('en-CA', { timeZone: 'Australia/Perth' }));\nreturn [{ json: {\n  source:            'Apple Health · Cycle Tracking',\n  last_period_start: new Date(today - 14 * DAY).toISOString().slice(0, 10),\n  logged_flow_days:  5,\n  avg_cycle_days:    28,\n} }];\n"
+      },
+      "name": "Apple Health: her cycle",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  Where is she in her cycle?\n//  Luteal phase = the ~14 days between ovulation and her next period.\n//  So luteal day 1 is (next period - 14 days), which for a 28-day\n//  cycle is cycle day 15.\n// ===================================================================\nconst c = $input.first().json.body || $input.first().json;\nconst DAY = 86400000;\nconst iso = d => new Date(d).toISOString().slice(0, 10);\n\nconst today = Date.parse(new Date().toLocaleDateString('en-CA', { timeZone: 'Australia/Perth' }));\nconst start = Date.parse(c.last_period_start);\nconst len = Number(c.avg_cycle_days) || 28;\nif (!isFinite(start)) throw new Error('No period start came through from her Shortcut');\n\nconst cycleDay = (Math.floor((today - start) / DAY) % len) + 1;\nconst lutealFrom = len - 13;                 // day 15 of a 28-day cycle\nconst nextPeriod = start + Math.ceil((today - start + 1) / (len * DAY)) * len * DAY;\n\nreturn [{ json: {\n  cycle_day:      cycleDay,\n  phase:          cycleDay <= 5 ? 'period' : cycleDay < lutealFrom ? 'follicular' : 'luteal',\n  luteal_day_1:   iso(nextPeriod - 14 * DAY),\n  next_period:    iso(nextPeriod),\n  days_to_period: Math.round((nextPeriod - today) / DAY),\n  luteal_today:   cycleDay === lutealFrom,\n} }];\n"
+      },
+      "name": "Work out her cycle",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.luteal_today }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Lutealing?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1380,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('⚙️ Linda settings').first().json.her.telegram_chat }}",
+        "text": "Thinking of you ❤️",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "name": "Text her: Thinking of you ❤️",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1680,
+        420
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_ME",
+          "name": "Your Telegram bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('⚙️ Linda settings').first().json.me.telegram_chat }}",
+        "text": "⚠️ Caution: Shark week incoming. Show up.\n\n– Linda",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "name": "Text me: Shark week incoming",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1980,
+        420
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_ME",
+          "name": "Your Telegram bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.telegram.org/botYOUR_TELEGRAM_BOT_TOKEN/getUpdates",
+        "options": {
+          "timeout": 20000
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "timeout",
+              "value": "0"
+            },
+            {
+              "name": "limit",
+              "value": "100"
+            },
+            {
+              "name": "allowed_updates",
+              "value": "[\"message\"]"
+            }
+          ]
+        }
+      },
+      "name": "Has she replied?",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2280,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  Has she replied yet?\n//  Reads the bot's real Telegram updates for a message in her chat\n//  sent AFTER \"Thinking of you\" went out. No reply = hold 3s, ask again.\n// ===================================================================\nconst cfg = $('⚙️ Linda settings').first().json;\nconst sentAt = $('Text her: Thinking of you ❤️').first().json.result.date;   // unix seconds\n\nlet reply = null;\nfor (const u of ($input.first().json.result || [])) {\n  const m = u.message;\n  if (m && String(m.chat.id) === String(cfg.her.telegram_chat) && m.date >= sentAt && m.text\n      && !(m.from && m.from.is_bot)) reply = m;                    // last one wins\n}\n// Test hook: the webhook trigger can pass a reply so the run can be verified hands-free.\nif (!reply) { try { const t = $('Webhook (test)').first().json.body.test_reply; if (t) reply = { text: t }; } catch (e) {} }\n\nconst waited = ($runIndex || 0) * 3;\nif (!reply && waited > 300) throw new Error('No reply after 5 minutes. Reply in Telegram, then run it again.');\n\nreturn [{ json: {\n  replied:    !!reply,\n  her_reply:  reply ? reply.text : 'waiting for her reply...',\n  waited_sec: waited,\n} }];\n"
+      },
+      "name": "Read her reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2580,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.replied }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "She replied?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2880,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "seconds"
+      },
+      "name": "Not yet, hold 3s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2580,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://overpass.kumi.systems/api/interpreter",
+        "options": {
+          "timeout": 30000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Linda-ProjectLuteal/1.0 (github.com/aaronparton2-sketch/project-luteal)"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={{ $('⚙️ Linda settings').first().json.osm_query }}"
+            }
+          ]
+        }
+      },
+      "name": "Find the closest florist",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3180,
+        420
+      ],
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  Closest florist to where she works, from OpenStreetMap.\n//  Free, keyless, real shops. OSM often lists the shop's email; if it\n//  doesn't, the next node reads it off the florist's own website.\n// ===================================================================\nconst cfg = $('⚙️ Linda settings').first().json;\nconst w = cfg.her.work;\nconst rad = Math.PI / 180;\nconst km = (a, b) => {\n  const x = Math.sin((b.lat - a.lat) * rad / 2) ** 2 +\n            Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin((b.lon - a.lon) * rad / 2) ** 2;\n  return 6371 * 2 * Math.asin(Math.sqrt(x));\n};\n\nconst shops = ($input.first().json.elements || []).map(e => {\n  const t = e.tags || {};\n  const p = { lat: e.lat || (e.center && e.center.lat), lon: e.lon || (e.center && e.center.lon) };\n  return {\n    name:    t.name,\n    km:      p.lat ? +km(w, p).toFixed(2) : 999,\n    email:   t.email || t['contact:email'] || '',\n    website: t.website || t['contact:website'] || '',\n    phone:   t.phone || t['contact:phone'] || '',\n    address: [t['addr:housenumber'], t['addr:street'], t['addr:suburb']].filter(Boolean).join(' '),\n  };\n}).filter(s => s.name && s.km < 999).sort((a, b) => a.km - b.km);\n\n// OpenStreetMap down or nothing nearby? Use the florist you set up as a fallback.\nif (!shops.length) shops.push(Object.assign({ km: null, fallback: true }, cfg.flowers.fallback_florist));\nreturn [{ json: Object.assign({ florists_found: shops.length }, shops[0]) }];\n"
+      },
+      "name": "Pick the florist",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3480,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  Write the order. Goes to the florist's own email in the full build.\n//  FILMING: order_inbox is set, so it comes to my inbox instead.\n// ===================================================================\nconst cfg = $('⚙️ Linda settings').first().json;\nconst f = $input.first().json;\nconst html =\n  '<p>Hi ' + f.name + ' team,</p>' +\n  '<p>Could I please order <b>' + cfg.flowers.order + '</b> for delivery <b>today, before ' +\n  cfg.flowers.deliver_by + '</b>, to ' + cfg.her.name + ' at ' + cfg.her.work.name + '.</p>' +\n  '<p>Card message: <i>\"' + cfg.flowers.card + '\"</i></p>' +\n  '<p>Please charge the card you have on file for me. Thanks so much!</p>' +\n  '<p>' + cfg.me.name + '</p>';\nreturn [{ json: {\n  florist: f.name, km: f.km,\n  send_to: cfg.flowers.order_inbox || f.email,\n  subject: 'Flower order for today: ' + cfg.flowers.order,\n  html: html,\n} }];\n"
+      },
+      "name": "Write the order",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3780,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.send_to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "={{ $('⚙️ Linda settings').first().json.me.name }}"
+        }
+      },
+      "name": "Email the florist",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        4080,
+        420
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  FILMING STUB for two Google Calendar nodes in the full build:\n//  Get many events (this Friday, matching \"boys\") -> Update each one,\n//  start + end moved 7 days. Updating an event emails the boys.\n// ===================================================================\nconst fmt = d => d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Australia/Perth' });\nconst now = new Date();\nconst fri = new Date(now.getTime() + ((5 - now.getDay() + 7) % 7) * 86400000);\nreturn [{ json: {\n  event:          \"Boys' night @ The Royal\",\n  was:            fmt(fri) + ', 7:00pm',\n  now:            fmt(new Date(fri.getTime() + 7 * 86400000)) + ', 7:00pm',\n  invites_updated: ['Davo', 'Mick', 'Tommo'],\n} }];\n"
+      },
+      "name": "Google Calendar: move boys' night",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4380,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  FILMING STUB for Google Calendar: Create event.\n// ===================================================================\nreturn [{ json: {\n  created: 'Shark week duty 🛋️',\n  when:    'Fri, 6:00pm till late',\n  note:    'No excuses.',\n} }];\n"
+      },
+      "name": "Google Calendar: block Friday",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4680,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('⚙️ Linda settings').first().json.me.telegram_chat }}",
+        "text": "=💐 {{ $('⚙️ Linda settings').first().json.flowers.order }} ordered from {{ $('Write the order').first().json.florist }}. Landing before {{ $('⚙️ Linda settings').first().json.flowers.deliver_by }}.\n\n📅 Boys' night moved to next Friday. You're on duty. No excuses.\n\n– Linda",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "name": "Text me: all sorted",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4980,
+        420
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_ME",
+          "name": "Your Telegram bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "name": "Wait until 5:30pm",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5280,
+        420
+      ],
+      "notes": "FILMING: 2 seconds. The full build fires on a 5:10pm schedule."
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  FILMING STUB for \"Order Grill'd (Browserless)\" in the full build.\n//  Grill'd has no ordering API, so a headless browser logs into your\n//  Grill'd account, reorders the saved favourite and pays with the\n//  saved card. Pickup, because the courier collects it.\n// ===================================================================\nconst cfg = $('⚙️ Linda settings').first().json;\nreturn [{ json: {\n  store:   cfg.comfort_order.store + ' (closest store)',\n  items:   cfg.comfort_order.items,\n  order:   'pickup, paid, ready in 15 min',\n  for:     cfg.me.name,\n} }];\n"
+      },
+      "name": "Order Grill'd (Browserless)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5580,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  FILMING STUB for Uber Direct. Full build: POST\n//  /v1/customers/{id}/deliveries, pickup at Grill'd, drop-off at hers.\n//  Uber Direct's sandbox has a robot courier that walks the delivery\n//  through every status without a real driver.\n// ===================================================================\nconst cfg = $('⚙️ Linda settings').first().json;\nreturn [{ json: {\n  delivery_id:  'del_' + Math.random().toString(36).slice(2, 12),\n  status:       'pending',\n  pickup:       $input.first().json.store,\n  dropoff:      cfg.her.name + \"'s place\",\n  pickup_notes: 'Order under ' + cfg.me.name + ': ' + cfg.comfort_order.items.join(' + '),\n} }];\n"
+      },
+      "name": "Uber Direct: book the driver",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5880,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  FILMING STUB for the Uber Direct webhook. This is the payload it\n//  posts when the driver picks up: status pickup_complete. In the full\n//  build that event is the trigger for the movie lane.\n// ===================================================================\nreturn [{ json: {\n  kind:        'event.delivery_status',\n  status:      'pickup_complete',\n  delivery_id: $input.first().json.delivery_id,\n  courier:     { name: 'Sam', vehicle_type: 'car' },\n  eta_min:     12,\n} }];\n"
+      },
+      "name": "Uber Direct: driver on the way",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6180,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "Run actor and get dataset",
+        "actorId": {
+          "__rl": true,
+          "value": "2CsR12ovx5Ln2cXKw",
+          "mode": "list",
+          "cachedResultName": "JustWatch Scraper (scrapesage/justwatch-streaming-scraper)",
+          "cachedResultUrl": "https://console.apify.com/actors/2CsR12ovx5Ln2cXKw/input"
+        },
+        "customBody": "{\n  \"mode\": \"discover\",\n  \"countries\": [\n    \"AU\"\n  ],\n  \"providers\": [\n    \"Netflix\"\n  ],\n  \"contentTypes\": [\n    \"MOVIE\"\n  ],\n  \"monetizationTypes\": [\n    \"FLATRATE\"\n  ],\n  \"sortBy\": \"TRENDING\",\n  \"maxResults\": 30,\n  \"deduplicateResults\": true,\n  \"language\": \"en\",\n  \"maxConcurrency\": 4\n}",
+        "maxTotalChargeUsd": 0.1,
+        "timeout": 240
+      },
+      "name": "Apify: new on Netflix AU",
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        6480,
+        420
+      ],
+      "credentials": {
+        "apifyApi": {
+          "id": "REPLACE_ME",
+          "name": "Apify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  Her Netflix history. Netflix has no API, so she downloads Viewing\n//  Activity as a CSV and it lives in a Google Sheet. FILMING STUB:\n//  the rows from that CSV.\n// ===================================================================\nreturn [{ json: {\n  source: 'Netflix > Viewing activity (CSV)',\n  watched: [\n    'Barbie', 'Mean Girls', 'The Proposal', 'Crazy Rich Asians', 'The Devil Wears Prada',\n    'Gilmore Girls: Season 1: Pilot', 'Emily in Paris: Season 4: Got Ghosted',\n    'Bridgerton: Season 3: Out of the Shadows', 'Reminders of Him', 'The Gentlemen',\n  ],\n} }];\n"
+      },
+      "name": "Her Netflix history",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6780,
+        420
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================================================================\n//  Fresh on Netflix vs what she's already watched.\n//  Netflix's Viewing Activity CSV writes episodes as\n//  \"Show: Season 1: Episode\", so compare on the part before the colon.\n// ===================================================================\nconst norm = s => String(s || '').toLowerCase().split(':')[0].replace(/[^a-z0-9]/g, '');\nconst watched = new Set(($('Her Netflix history').first().json.watched || []).map(norm));\n\nconst scraped = $('Apify: new on Netflix AU').all().map(i => i.json).filter(m => m.title);\nconst fresh = scraped.filter(m => !watched.has(norm(m.title)) && !watched.has(norm(m.originalTitle)));\n\nconst lines = fresh.map(m => '- ' + m.title + ' · ' + (m.releaseYear || '?') + ' · ' +\n  (m.genres || []).join(', ') + ' · IMDb ' + (m.imdbScore || '?') + ' · ' +\n  String(m.shortDescription || '').slice(0, 160));\n\nreturn [{ json: {\n  scraped:         scraped.length,\n  already_watched: scraped.length - fresh.length,\n  candidates:      fresh.length,\n  candidates_text: lines.join('\\n'),\n} }];\n"
+      },
+      "name": "Compare against her history",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7080,
+        420
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=On Netflix tonight, and she hasn't watched any of these:\n\n{{ $json.candidates_text }}\n\nPick her three.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are Linda, an agent who looks after his girlfriend while she's in her luteal phase. Tonight she is tired, a bit crampy and does not want to think. From the list you are given, pick exactly three films: COMFORT (warm, feel-good, romance, uplifting), FUNNY (actually funny, light) and BRAIN_OFF (easy, fun, zero effort). Never horror, nothing grim, nothing violent or bleak, and nothing about grief, death, illness or loss. Use what you know about each film, not just its genre tags. Only pick titles that appear in the list. 'title' is the film's name exactly as listed, with no year. 'why' is at most 7 words and a bit cheeky."
+        }
+      },
+      "name": "Linda picks 3 movies",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        7380,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {
+          "maxTokensToSample": 600,
+          "temperature": 0.7
+        }
+      },
+      "name": "Claude",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        7290,
+        640
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "REPLACE_ME",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"comfort\": {\n    \"title\": \"The Notebook\",\n    \"why\": \"guaranteed happy cry\"\n  },\n  \"funny\": {\n    \"title\": \"21 Jump Street\",\n    \"why\": \"dumb in the best way\"\n  },\n  \"brain_off\": {\n    \"title\": \"Shrek\",\n    \"why\": \"zero thinking required\"\n  }\n}"
+      },
+      "name": "Three picks",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        7490,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('⚙️ Linda settings').first().json.me.telegram_chat }}",
+        "text": "=🍿 Movie night. Give her these three:\n\n💗 Comfort: {{ $json.output.comfort.title }}\n😂 Funny: {{ $json.output.funny.title }}\n🧠 Brain off: {{ $json.output.brain_off.title }}\n\nOptions, not homework. – Linda",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "name": "Text me the 3 options",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        7680,
+        420
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_ME",
+          "name": "Your Telegram bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "⚙️ Linda settings": {
+      "main": [
+        [
+          {
+            "node": "Apple Health: her cycle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apple Health: her cycle": {
+      "main": [
+        [
+          {
+            "node": "Work out her cycle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Work out her cycle": {
+      "main": [
+        [
+          {
+            "node": "Lutealing?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lutealing?": {
+      "main": [
+        [
+          {
+            "node": "Text her: Thinking of you ❤️",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Text her: Thinking of you ❤️": {
+      "main": [
+        [
+          {
+            "node": "Text me: Shark week incoming",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text me: Shark week incoming": {
+      "main": [
+        [
+          {
+            "node": "Has she replied?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has she replied?": {
+      "main": [
+        [
+          {
+            "node": "Read her reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read her reply": {
+      "main": [
+        [
+          {
+            "node": "She replied?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "She replied?": {
+      "main": [
+        [
+          {
+            "node": "Find the closest florist",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Not yet, hold 3s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Not yet, hold 3s": {
+      "main": [
+        [
+          {
+            "node": "Has she replied?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find the closest florist": {
+      "main": [
+        [
+          {
+            "node": "Pick the florist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick the florist": {
+      "main": [
+        [
+          {
+            "node": "Write the order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write the order": {
+      "main": [
+        [
+          {
+            "node": "Email the florist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email the florist": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar: move boys' night",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar: move boys' night": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar: block Friday",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar: block Friday": {
+      "main": [
+        [
+          {
+            "node": "Text me: all sorted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text me: all sorted": {
+      "main": [
+        [
+          {
+            "node": "Wait until 5:30pm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait until 5:30pm": {
+      "main": [
+        [
+          {
+            "node": "Order Grill'd (Browserless)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order Grill'd (Browserless)": {
+      "main": [
+        [
+          {
+            "node": "Uber Direct: book the driver",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Uber Direct: book the driver": {
+      "main": [
+        [
+          {
+            "node": "Uber Direct: driver on the way",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Uber Direct: driver on the way": {
+      "main": [
+        [
+          {
+            "node": "Apify: new on Netflix AU",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify: new on Netflix AU": {
+      "main": [
+        [
+          {
+            "node": "Her Netflix history",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Her Netflix history": {
+      "main": [
+        [
+          {
+            "node": "Compare against her history",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare against her history": {
+      "main": [
+        [
+          {
+            "node": "Linda picks 3 movies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Linda picks 3 movies": {
+      "main": [
+        [
+          {
+            "node": "Text me the 3 options",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run it now": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Linda settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook (test)": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Linda settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Linda picks 3 movies",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Three picks": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Linda picks 3 movies",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Australia/Perth"
+  }
+}

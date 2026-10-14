@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Luteal | Linda by Aaron Automates</title>
+<meta name="description" content="Linda is an n8n agent that reads her cycle from Apple Health and, the day she starts lutealing, lines up flowers, comfort food and three movie options, and clears your Friday night. Get the whole build, free.">
+<meta property="og:title" content="Linda, the agent that runs shark week">
+<meta property="og:description" content="Flowers, comfort food, three movie options and a cleared Friday night. Get the free n8n build.">
+<meta property="og:image" content="linda.webp">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF2EF;         /* blush */
+    --card:#FFFFFF;
+    --ink:#2A1420;           /* deep plum */
+    --muted:#76606A;
+    --line:#EEDDD8;
+    --accent:#E2456B;        /* pink rose */
+    --accent-deep:#C4325A;
+    --data:#8A3FA8;          /* lavender readout */
+    --ok:#1D7A46;
+    --tg:#2AABEE; --tg-soft:#E4F3FC; --tg-ink:#17679A;
+    --z1:#E2456B; --z2:#8A3FA8; --z3:#F29A3A;
+    --radius:14px;
+    --display:"Bricolage Grotesque",system-ui,sans-serif;
+    --body:"Inter",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--body);color:var(--ink);
+    background:
+      radial-gradient(1200px 380px at 82% -8%, rgba(226,69,107,.13), transparent 60%),
+      radial-gradient(900px 420px at 5% 0%, rgba(138,63,168,.09), transparent 55%),
+      var(--paper);
+    line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--data)}
+  button{font:inherit;cursor:pointer}
+
+  .site-header{position:sticky;top:0;z-index:40;
+    background:rgba(251,242,239,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .site-header .bar{max-width:1060px;margin:0 auto;padding:12px 20px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .wordmark{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.12em;white-space:nowrap}
+  .wordmark .tilde{color:var(--accent)}
+  .wordmark .by{color:var(--muted);font-weight:400;letter-spacing:.06em}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    border:0;border-radius:10px;font-weight:600;text-decoration:none;
+    transition:background-color .15s ease, transform .1s ease}
+  .btn-accent{background:var(--accent);color:#fff;padding:10px 18px;font-size:15px;
+    box-shadow:0 1px 2px rgba(42,20,32,.14)}
+  .btn-accent:hover{background:var(--accent-deep)}
+  .btn-accent:active{transform:translateY(1px)}
+  .btn:focus-visible,a:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid rgba(226,69,107,.45);outline-offset:2px}
+
+  .hero{max-width:1060px;margin:0 auto;padding:60px 20px 24px;
+    display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:start}
+  .hero-copy{min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;font-weight:600;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--data);margin-bottom:18px}
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(36px,4.9vw,56px);
+    line-height:1.04;letter-spacing:-.018em;margin-bottom:18px;text-wrap:balance}
+  h1 .flow{color:var(--accent)}
+  .subhead{font-size:18px;color:var(--muted);max-width:44ch;margin-bottom:28px}
+
+  /* the actual day, as it lands in Telegram */
+  .readout{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;margin-bottom:34px;max-width:520px;box-shadow:0 1px 3px rgba(42,20,32,.06)}
+  .readout .meta{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);
+    font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:12px}
+  .readout .meta .ex{color:var(--data)}
+  .bubble{background:var(--tg-soft);border-radius:14px 14px 14px 4px;padding:11px 13px 12px;
+    font-size:14.5px;line-height:1.5;margin-bottom:10px;max-width:92%}
+  .bubble .who{display:block;font-family:var(--mono);font-size:11px;font-weight:600;
+    letter-spacing:.04em;color:var(--tg-ink);margin-bottom:5px}
+  .bubble.her{background:#F4EEF1;margin-left:auto;border-radius:14px 14px 4px 14px;max-width:70%}
+  .bubble.her .who{color:var(--accent)}
+  .rows{font-family:var(--mono);font-size:13px;line-height:1.8;margin:2px 0 2px}
+  .rows .row{display:grid;grid-template-columns:9ch 1fr;gap:10px;align-items:baseline}
+  .rows .row .lbl{color:var(--muted)}
+  .rows.wide .row{grid-template-columns:12.5ch 1fr}
+  .rows .row .lbl{white-space:nowrap}
+  .rows .row b{font-weight:600}
+  .readout .coach{margin-top:4px;padding-top:10px;border-top:1px dashed var(--line);
+    font-family:var(--mono);font-size:12.5px;line-height:1.7;color:var(--muted)}
+  .readout .coach .ln{display:flex;gap:8px;align-items:flex-start}
+  .readout .coach .tag{color:var(--accent);font-weight:600;flex:0 0 auto}
+
+  .get h2{font-family:var(--display);font-size:19px;font-weight:700;margin-bottom:10px}
+  .get ul{list-style:none}
+  .get li{display:flex;gap:12px;align-items:flex-start;padding:6px 0;font-size:15.5px}
+  .get li .dot{flex:0 0 auto;width:10px;height:10px;border-radius:50%;margin-top:7px}
+  .get li:nth-child(1) .dot{background:var(--z1)}
+  .get li:nth-child(2) .dot{background:var(--z2)}
+  .get li:nth-child(3) .dot{background:var(--z3)}
+  .get li b{font-weight:600}
+  .get .free{margin-top:10px;font-family:var(--mono);font-size:12.5px;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--ok)}
+
+  /* signup card */
+  .signup-card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 10px 30px rgba(42,20,32,.10);padding:26px;position:sticky;top:76px}
+  .cover-wrap{margin:-26px -26px 22px;border-radius:18px 18px 0 0;overflow:hidden;
+    background:radial-gradient(420px 260px at 70% 30%, #5B2340 0%, #2A1420 60%, #1A0C14 100%)}
+  .cover{position:relative;height:250px}
+  .cover img{position:absolute;right:-44px;bottom:-30px;height:282px;width:auto;
+    filter:drop-shadow(0 10px 24px rgba(0,0,0,.45))}
+  .cover .petals span{position:absolute;width:9px;height:12px;border-radius:60% 60% 60% 0;
+    background:#F47A98;opacity:.55;animation:fall 7s linear infinite}
+  @keyframes fall{0%{transform:translateY(-20px) rotate(0)}100%{transform:translateY(280px) rotate(320deg)}}
+  .cover .lab{position:absolute;left:22px;top:20px;color:#fff;pointer-events:none;max-width:48%;z-index:2}
+  .cover .lab .cs{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:#F7B2C3;margin-bottom:6px}
+  .cover .lab .ct{display:block;font-family:var(--display);font-weight:800;font-size:30px;line-height:1.02;
+    text-shadow:0 2px 12px rgba(10,4,8,.5)}
+  .cover .lab .cd{display:block;margin-top:10px;font-size:13px;color:#F2D9E0;line-height:1.4}
+  .signup-card h2{font-family:var(--display);font-size:22px;font-weight:700;margin-bottom:6px}
+  .signup-card .say{font-size:14.5px;color:var(--muted);margin-bottom:18px}
+  label{display:block;font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .fld{margin-bottom:14px}
+  input{width:100%;background:#FDF8F6;border:1px solid var(--line);color:var(--ink);
+    border-radius:10px;padding:13px 14px;font:500 16px var(--body)}
+  input::placeholder{color:#B39EA6}
+  input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(226,69,107,.14)}
+  .submit{width:100%;background:var(--accent);color:#fff;border:0;border-radius:10px;
+    padding:15px 20px;font-family:var(--display);font-weight:700;font-size:17px;margin-top:2px}
+  .submit:hover{background:var(--accent-deep)}
+  .submit:disabled{opacity:.6;cursor:default}
+  .fine{margin-top:12px;font-size:12.5px;color:var(--muted);text-align:center;line-height:1.5}
+  .err{background:#FDEDEF;border:1px solid #F3BCC8;color:#9B1E3E;border-radius:10px;
+    padding:11px 13px;font-size:14px;margin-bottom:14px}
+
+  .tick-big{width:60px;height:60px;border-radius:50%;margin:0 auto 16px;
+    background:#E7F4EC;color:var(--ok);display:flex;align-items:center;justify-content:center}
+  .repo{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff;
+    border-radius:10px;padding:14px 20px;text-decoration:none;font-weight:600;font-size:15.5px}
+  .repo:hover{background:#4A2438;color:#fff}
+  .done{text-align:center;padding:4px 0 2px}
+  .done h2{margin-bottom:8px}
+  .done p{color:var(--muted);font-size:14.5px;margin-bottom:18px}
+
+  /* how it runs */
+  .how{max-width:1060px;margin:28px auto 0;padding:0 20px}
+  .how h2{font-family:var(--display);font-size:26px;font-weight:800;margin-bottom:6px}
+  .how .lede{color:var(--muted);margin-bottom:20px;max-width:60ch}
+  .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 14px}
+  .step .t{font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.06em;color:var(--data);text-transform:uppercase}
+  .step .e{font-size:26px;line-height:1;margin:10px 0 8px}
+  .step h3{font-family:var(--display);font-size:16px;font-weight:700;margin-bottom:4px}
+  .step p{font-size:13.5px;color:var(--muted);line-height:1.45}
+  .step .api{margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--accent)}
+
+  /* success modal */
+  .overlay{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+    padding:20px;background:rgba(42,20,32,.58);backdrop-filter:blur(4px);
+    opacity:0;visibility:hidden;transition:opacity .22s ease,visibility 0s linear .22s}
+  .overlay.open{opacity:1;visibility:visible;transition:opacity .22s ease}
+  .modal{position:relative;background:var(--card);border-radius:20px;max-width:440px;width:100%;
+    padding:34px 28px 26px;text-align:center;box-shadow:0 30px 70px rgba(20,6,12,.38);
+    transform:translateY(14px) scale(.96);transition:transform .26s cubic-bezier(.2,.8,.2,1)}
+  .overlay.open .modal{transform:none}
+  .mclose{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:9px;
+    border:0;background:transparent;color:var(--muted);font-size:24px;line-height:1}
+  .mclose:hover{background:var(--paper);color:var(--ink)}
+  .modal .eyebrow{margin-bottom:8px}
+  .modal h2{font-family:var(--display);font-size:26px;font-weight:800;line-height:1.1;margin-bottom:8px}
+  .modal p{color:var(--muted);font-size:15px;margin-bottom:20px}
+  .modal .fine{margin-top:16px;margin-bottom:0}
+
+  footer{max-width:1060px;margin:40px auto 0;padding:22px 20px 60px;border-top:1px solid var(--line);
+    font-size:13.5px;color:var(--muted);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .hide{display:none!important}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+  @media (max-width:980px){.steps{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:880px){
+    .hero{grid-template-columns:1fr;gap:36px;padding-top:38px}
+    .signup-card{position:static}
+    .readout{max-width:none}
+  }
+  @media (max-width:480px){
+    .site-header .bar{padding:10px 16px;gap:10px}
+    .wordmark{font-size:11.5px;letter-spacing:.08em}
+    .btn-accent{padding:9px 14px;font-size:14px}
+    .hero,.how{padding-left:16px;padding-right:16px}
+    .subhead{font-size:17px}
+    .readout{padding:14px}
+    .rows{font-size:12.5px}
+    .steps{grid-template-columns:1fr}
+    .signup-card{padding:22px 18px}
+    .cover-wrap{margin:-22px -18px 20px}
+    .cover{height:232px}
+    .cover img{height:250px;right:-50px}
+    .cover .lab{left:18px;top:16px}
+    .cover .lab .ct{font-size:26px}
+    .modal{padding:30px 20px 22px}
+    footer{padding-left:16px;padding-right:16px}
+  }
+  @media (max-width:360px){.wordmark .by{display:none}}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <div class="wordmark"><span class="tilde">~</span>&nbsp;LINDA <span class="by">/ by aaron automates</span></div>
+    <a class="btn btn-accent" href="#get">Get the build</a>
+  </div>
+</header>
+
+<main class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow">Free n8n build · Project Luteal</div>
+    <h1>Linda runs shark week. You just <span class="flow">show up.</span></h1>
+    <p class="subhead">
+      She reads the cycle from Apple Health. The day luteal starts, flowers, comfort food and three movie options get lined up, and your Friday gets cleared.
+    </p>
+
+    <div class="readout" role="img" aria-label="Example day in Telegram. Linda sends Thinking of you with a heart. She replies aw thanks babe. Linda reports 12 pink roses ordered from the closest florist, boys' night moved to next Friday. Then three movie picks: The Notebook for comfort, 21 Jump Street for funny, Shrek for brain off.">
+      <div class="meta"><span>A real run</span><span class="ex">Telegram · 7:30am to 5:42pm</span></div>
+
+      <div class="bubble">
+        <span class="who">LINDA · 7:30</span>
+        Thinking of you ❤️
+      </div>
+      <div class="bubble her">
+        <span class="who">HER · 7:41</span>
+        aw thanks babe 🥹
+      </div>
+      <div class="bubble">
+        <span class="who">LINDA → YOU · 7:42</span>
+        <div class="rows">
+          <div class="row"><span class="lbl">Flowers</span><b>12 pink roses · closest florist</b></div>
+          <div class="row"><span class="lbl">Landing</span><b>before 4:30pm</b></div>
+          <div class="row"><span class="lbl">Friday</span><b>boys' night moved. No excuses.</b></div>
+        </div>
+      </div>
+      <div class="bubble">
+        <span class="who">LINDA → YOU · 5:42 · driver's on the way</span>
+        <div class="rows wide">
+          <div class="row"><span class="lbl">💗 Comfort</span><b>The Notebook</b></div>
+          <div class="row"><span class="lbl">😂 Funny</span><b>21 Jump Street</b></div>
+          <div class="row"><span class="lbl">🧠 Brain off</span><b>Shrek</b></div>
+        </div>
+      </div>
+
+      <div class="coach">
+        <span class="ln"><span class="tag">→</span><span>5:30pm her Grill'd order fires, a courier gets booked</span></span>
+        <span class="ln"><span class="tag">→</span><span>movies picked from what's new on Netflix she hasn't seen</span></span>
+      </div>
+    </div>
+
+    <section class="get">
+      <h2>What you get</h2>
+      <ul>
+        <li><span class="dot"></span><span><b>The full n8n workflow</b>, all five lanes, on GitHub</span></li>
+        <li><span class="dot"></span><span><b>The one-click demo workflow</b> that runs end to end</span></li>
+        <li><span class="dot"></span><span><b>Setup notes</b>: the iPhone Shortcut, Telegram, Uber Direct, Apify</span></li>
+      </ul>
+      <p class="free">Free · MIT · no strings</p>
+    </section>
+  </div>
+
+  <aside>
+    <div class="signup-card" id="get">
+      <div class="cover-wrap">
+        <div class="cover">
+          <div class="petals" aria-hidden="true">
+            <span style="left:12%;animation-delay:0s"></span><span style="left:28%;animation-delay:2.4s"></span>
+            <span style="left:44%;animation-delay:4.8s"></span><span style="left:7%;animation-delay:5.9s"></span>
+            <span style="left:36%;animation-delay:1.2s"></span>
+          </div>
+          <img src="linda.webp" alt="Linda, a chrome robot in glasses and a pink cardigan, holding a phone showing a cycle ring and a bunch of pink roses." width="296" height="312">
+          <div class="lab" aria-hidden="true">
+            <span class="cs">Free n8n build</span>
+            <span class="ct">Project<br>Luteal</span>
+            <span class="cd">Meet Linda. She's got this.</span>
+          </div>
+        </div>
+      </div>
+
+      <form id="vForm" novalidate>
+        <h2>Send me the build</h2>
+        <p class="say">Three quick things and the repo opens up.</p>
+        <div id="err" class="err hide" role="alert"></div>
+        <div class="fld"><label for="fName">Your name</label>
+          <input id="fName" name="name" type="text" maxlength="60" placeholder="Your name" autocomplete="name" required></div>
+        <div class="fld"><label for="fMail">Email</label>
+          <input id="fMail" name="email" type="email" maxlength="120" placeholder="you@example.com" autocomplete="email" required></div>
+        <div class="fld"><label for="fFood">Her go-to comfort food</label>
+          <input id="fFood" name="comfort_food" type="text" maxlength="60" placeholder="Grill'd, sweet potato chips" autocomplete="off" required></div>
+        <button class="submit" id="go" type="submit">Send it over</button>
+        <p class="fine">No list, no drip sequence. One email if I ship something big.</p>
+      </form>
+
+      <div id="vDone" class="done hide">
+        <div class="tick-big">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5 9.5 18 20 6.5"/></svg>
+        </div>
+        <h2 id="dHead">You're in.</h2>
+        <p>The repo is yours. Import it, swap in your keys, and let Linda take it from here.</p>
+        <a class="repo" id="dLink" href="#" target="_blank" rel="noopener">Open the repo</a>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<section class="how" aria-labelledby="howH">
+  <h2 id="howH">How Linda runs the day</h2>
+  <p class="lede">Five lanes in one n8n workflow. Where a thing has no API, the workaround is real and written up in the repo.</p>
+  <div class="steps">
+    <div class="step"><div class="t">When she plugs in</div><div class="e">🩸</div><h3>Reads her cycle</h3><p>An iPhone Shortcut reads Apple Health and pings Linda.</p><div class="api">Apple Health · Shortcuts</div></div>
+    <div class="step"><div class="t">7:30am</div><div class="e">❤️</div><h3>Two messages</h3><p>"Thinking of you" to her. "Shark week incoming" to you.</p><div class="api">Telegram</div></div>
+    <div class="step"><div class="t">She replies</div><div class="e">💐</div><h3>Flowers + Friday</h3><p>Closest florist gets the order. Boys' night moves a week.</p><div class="api">OpenStreetMap · Gmail · Calendar</div></div>
+    <div class="step"><div class="t">5:30pm</div><div class="e">🍔</div><h3>Comfort order</h3><p>Her Grill'd favourite, and a courier to her door.</p><div class="api">Browserless · Uber Direct</div></div>
+    <div class="step"><div class="t">Driver's on the way</div><div class="e">🍿</div><h3>Three movies</h3><p>New on Netflix, minus what she's seen. Comfort, funny, brain off.</p><div class="api">Apify · Claude</div></div>
+  </div>
+</section>
+
+<footer>
+  <span>Built by <a href="https://myceliumai.com.au">Mycelium AI</a> in Perth.</span>
+  <span>MIT licensed. She's not mad. She's just disappointed.</span>
+</footer>
+
+<!-- success popup -->
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="mHead" aria-hidden="true">
+  <div class="modal">
+    <button class="mclose" type="button" id="mClose" aria-label="Close">&times;</button>
+    <div class="tick-big">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5 9.5 18 20 6.5"/></svg>
+    </div>
+    <p class="eyebrow">Free n8n build</p>
+    <h2 id="mHead">You're in.</h2>
+    <p>Import the workflow, swap in your keys, and let Linda take it from here.</p>
+    <a class="repo" id="mLink" href="#" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 16 16" fill="#fff" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.49-2.7-1.07-2.7-1.07-.36-.93-.89-1.18-.89-1.18-.73-.5.05-.49.05-.49.81.06 1.23.83 1.23.83.72 1.23 1.89.87 2.35.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      Open the repo
+    </a>
+    <p class="fine" id="mFood">Linda's on it.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var form = $('vForm'), errBox = $('err'), btn = $('go');
+  var overlay = $('overlay'), lastFocus = null;
+
+  function showErr(m) { errBox.textContent = m; errBox.classList.remove('hide'); }
+
+  function openModal() {
+    lastFocus = document.activeElement;
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () { $('mLink').focus(); }, 80);
+  }
+  function closeModal() {
+    if (!overlay.classList.contains('open')) return;
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  $('mClose').addEventListener('click', closeModal);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', function (e) {
+    if (!overlay.classList.contains('open')) return;
+    if (e.key === 'Escape') { closeModal(); return; }
+    if (e.key === 'Tab') {
+      var f = [$('mClose'), $('mLink')];
+      var i = f.indexOf(document.activeElement);
+      if (e.shiftKey && (i <= 0)) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && (i === f.length - 1 || i === -1)) { e.preventDefault(); f[0].focus(); }
+    }
+  });
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    errBox.classList.add('hide');
+    var body = {
+      name: $('fName').value.trim(),
+      email: $('fMail').value.trim(),
+      comfort_food: $('fFood').value.trim()
+    };
+    if (body.name.length < 2) return showErr('Pop your name in.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(body.email)) return showErr("That email doesn't look right.");
+    if (!body.comfort_food) return showErr("What's her comfort food? One word will do.");
+
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      // Path-relative, like the other opt-ins, so it also works behind a rewrite
+      // (e.g. aaronautomates.com.au/luteal), where a root '/api' would 404.
+      var r = await fetch(location.pathname.replace(/\/index\.html$/, '').replace(/\/+$/, '') + '/api/subscribe', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      });
+      var d = {};
+      try { d = await r.json(); } catch (_) {}
+      if (!r.ok) throw new Error(d.error || 'Something went wrong. Try again in a sec.');
+
+      var who = d.name || body.name;
+      var head = d.returning ? ('Welcome back, ' + who + '.') : ("You're in, " + who + '.');
+
+      $('mLink').href = d.repo; $('dLink').href = d.repo;
+      $('mHead').textContent = head; $('dHead').textContent = head;
+      $('mFood').textContent = "Linda's ordering the " + body.comfort_food + '.';
+      form.classList.add('hide'); $('vDone').classList.remove('hide');
+      openModal();
+    } catch (err) {
+      showErr(err.message);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Send it over';
+    }
+  });
+})();
+</script>
+</body>
+</html>
