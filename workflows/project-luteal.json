@@ -13,7 +13,7 @@
       "typeVersion": 1,
       "position": [
         -340,
-        -420
+        -560
       ]
     },
     {
@@ -732,7 +732,10 @@
       "position": [
         1500,
         1900
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
       "parameters": {
@@ -908,7 +911,10 @@
           "id": "REPLACE_ME",
           "name": "Apify account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
       "parameters": {
@@ -928,7 +934,10 @@
         1200,
         2600
       ],
-      "executeOnce": true
+      "executeOnce": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
       "parameters": {
@@ -969,7 +978,10 @@
       "position": [
         2100,
         2600
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
       "parameters": {

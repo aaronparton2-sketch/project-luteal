@@ -1,5 +1,5 @@
 {
-  "name": "LINDA - FILMING (one click, end to end)",
+  "name": "LINDA - DEMO (one click, end to end)",
   "nodes": [
     {
       "parameters": {},
@@ -13,7 +13,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  ⚙️  Everything Linda needs to know. Edit this node, nothing else.\n//  FILMING: her Telegram chat is mine, so \"Thinking of you\" lands on\n//  my phone and I reply to it on camera. Swap her chat id in for real.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Pookie',\n    telegram_chat: 'YOUR_TELEGRAM_CHAT_ID',\n    work:  { name: 'her work (the café on Oxford St, Leederville)', lat: -31.9365, lon: 115.8418 },\n  },\n  me:          { name: 'Aaron', telegram_chat: 'YOUR_TELEGRAM_CHAT_ID' },\n  flowers: {\n    order:           '12 pink roses',\n    card:            'Thinking of you. x',\n    deliver_by:      '4:30pm',\n    search_radius_m: 2500,\n    order_inbox:     'you@example.com',   // FILMING: the order comes to me, not the shop\n    fallback_florist: { name: 'Your usual florist', email: '', website: '' },\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", items: ['Mustard & Pickled!', 'Sweet Potato Chips'], at: '5:30pm' },\n  movies:        { country: 'AU', service: 'Netflix' },\n};\n\n// The box \"Find the closest florist\" searches: her work, +/- search_radius_m.\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst dLat = r / 111320, dLon = r / (111320 * Math.cos(w.lat * Math.PI / 180));\ncfg.search_box = [w.lon - dLon, w.lat + dLat, w.lon + dLon, w.lat - dLat].map(n => n.toFixed(5)).join(',');\nreturn [{ json: cfg }];\n"
+        "jsCode": "// ===================================================================\n//  ⚙️  Everything Linda needs to know. Edit this node, nothing else.\n//  DEMO: point her chat at YOUR Telegram, so \"Thinking of you\" lands on\n//  your phone and you can reply to it yourself. Swap her chat id in for real.\n// ===================================================================\nconst cfg = {\n  her: {\n    name:  'Pookie',\n    telegram_chat: 'YOUR_TELEGRAM_CHAT_ID',\n    work:  { name: 'her work (the café on Oxford St, Leederville)', lat: -31.9365, lon: 115.8418 },\n  },\n  me:          { name: 'Aaron', telegram_chat: 'YOUR_TELEGRAM_CHAT_ID' },\n  flowers: {\n    order:           '12 pink roses',\n    card:            'Thinking of you. x',\n    deliver_by:      '4:30pm',\n    search_radius_m: 2500,\n    order_inbox:     'you@example.com',   // DEMO: the order comes to you, not the shop\n    fallback_florist: { name: 'Your usual florist', email: '', website: '' },\n  },\n  boys_night:    { match: 'boys', move_days: 7 },\n  comfort_order: { store: \"Grill'd\", items: ['Mustard & Pickled!', 'Sweet Potato Chips'], at: '5:30pm' },\n  movies:        { country: 'AU', service: 'Netflix' },\n};\n\n// The box \"Find the closest florist\" searches: her work, +/- search_radius_m.\nconst w = cfg.her.work, r = cfg.flowers.search_radius_m;\nconst dLat = r / 111320, dLon = r / (111320 * Math.cos(w.lat * Math.PI / 180));\ncfg.search_box = [w.lon - dLon, w.lat + dLat, w.lon + dLon, w.lat - dLat].map(n => n.toFixed(5)).join(',');\nreturn [{ json: cfg }];\n"
       },
       "name": "⚙️ Linda settings",
       "type": "n8n-nodes-base.code",
@@ -25,7 +25,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  📱 What her iPhone Shortcut posts when she plugs her phone in.\n//  Apple Health > Cycle Tracking > Find Health Samples (Menstrual Flow).\n//  FILMING STUB: in the full build this is the \"Her cycle\" webhook.\n//  Same fields. Her last period started 14 days ago.\n// ===================================================================\nconst DAY = 86400000;\nconst today = Date.parse(new Date().toLocaleDateString('en-CA', { timeZone: 'Australia/Perth' }));\nreturn [{ json: {\n  source:            'Apple Health · Cycle Tracking',\n  last_period_start: new Date(today - 14 * DAY).toISOString().slice(0, 10),\n  logged_flow_days:  5,\n  avg_cycle_days:    28,\n} }];\n"
+        "jsCode": "// ===================================================================\n//  📱 What her iPhone Shortcut posts when she plugs her phone in.\n//  Apple Health > Cycle Tracking > Find Health Samples (Menstrual Flow).\n//  DEMO STUB: in the full build this is the \"Her cycle\" webhook.\n//  Same fields. Her last period started 14 days ago.\n// ===================================================================\nconst DAY = 86400000;\nconst today = Date.parse(new Date().toLocaleDateString('en-CA', { timeZone: 'Australia/Perth' }));\nreturn [{ json: {\n  source:            'Apple Health · Cycle Tracking',\n  last_period_start: new Date(today - 14 * DAY).toISOString().slice(0, 10),\n  logged_flow_days:  5,\n  avg_cycle_days:    28,\n} }];\n"
       },
       "name": "Apple Health: her cycle",
       "type": "n8n-nodes-base.code",
@@ -286,7 +286,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  Write the order. Goes to the florist's own email in the full build.\n//  FILMING: order_inbox is set, so it comes to my inbox instead.\n// ===================================================================\nconst cfg = $('⚙️ Linda settings').first().json;\nconst f = $input.first().json;\nconst html =\n  '<p>Hi ' + f.name + ' team,</p>' +\n  '<p>Could I please order <b>' + cfg.flowers.order + '</b> for delivery <b>today, before ' +\n  cfg.flowers.deliver_by + '</b>, to ' + cfg.her.name + ' at ' + cfg.her.work.name + '.</p>' +\n  '<p>Card message: <i>\"' + cfg.flowers.card + '\"</i></p>' +\n  '<p>Please charge the card you have on file for me. Thanks so much!</p>' +\n  '<p>' + cfg.me.name + '</p>';\nreturn [{ json: {\n  florist: f.name, km: f.km,\n  send_to: cfg.flowers.order_inbox || f.email,\n  subject: 'Flower order for today: ' + cfg.flowers.order,\n  html: html,\n} }];\n"
+        "jsCode": "// ===================================================================\n//  Write the order. Goes to the florist's own email in the full build.\n//  DEMO: order_inbox is set, so it comes to your inbox instead.\n// ===================================================================\nconst cfg = $('⚙️ Linda settings').first().json;\nconst f = $input.first().json;\nconst html =\n  '<p>Hi ' + f.name + ' team,</p>' +\n  '<p>Could I please order <b>' + cfg.flowers.order + '</b> for delivery <b>today, before ' +\n  cfg.flowers.deliver_by + '</b>, to ' + cfg.her.name + ' at ' + cfg.her.work.name + '.</p>' +\n  '<p>Card message: <i>\"' + cfg.flowers.card + '\"</i></p>' +\n  '<p>Please charge the card you have on file for me. Thanks so much!</p>' +\n  '<p>' + cfg.me.name + '</p>';\nreturn [{ json: {\n  florist: f.name, km: f.km,\n  send_to: cfg.flowers.order_inbox || f.email,\n  subject: 'Flower order for today: ' + cfg.flowers.order,\n  html: html,\n} }];\n"
       },
       "name": "Write the order",
       "type": "n8n-nodes-base.code",
@@ -323,7 +323,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  FILMING STUB for two Google Calendar nodes in the full build:\n//  Get many events (this Friday, matching \"boys\") -> Update each one,\n//  start + end moved 7 days. Updating an event emails the boys.\n// ===================================================================\nconst fmt = d => d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Australia/Perth' });\nconst now = new Date();\nconst fri = new Date(now.getTime() + ((5 - now.getDay() + 7) % 7) * 86400000);\nreturn [{ json: {\n  event:          \"Boys' night @ The Royal\",\n  was:            fmt(fri) + ', 7:00pm',\n  now:            fmt(new Date(fri.getTime() + 7 * 86400000)) + ', 7:00pm',\n  invites_updated: ['Davo', 'Mick', 'Tommo'],\n} }];\n"
+        "jsCode": "// ===================================================================\n//  DEMO STUB for two Google Calendar nodes in the full build:\n//  Get many events (this Friday, matching \"boys\") -> Update each one,\n//  start + end moved 7 days. Updating an event emails the boys.\n// ===================================================================\nconst fmt = d => d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Australia/Perth' });\nconst now = new Date();\nconst fri = new Date(now.getTime() + ((5 - now.getDay() + 7) % 7) * 86400000);\nreturn [{ json: {\n  event:          \"Boys' night @ The Royal\",\n  was:            fmt(fri) + ', 7:00pm',\n  now:            fmt(new Date(fri.getTime() + 7 * 86400000)) + ', 7:00pm',\n  invites_updated: ['Davo', 'Mick', 'Tommo'],\n} }];\n"
       },
       "name": "Google Calendar: move boys' night",
       "type": "n8n-nodes-base.code",
@@ -335,7 +335,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  FILMING STUB for Google Calendar: Create event.\n// ===================================================================\nreturn [{ json: {\n  created: 'Shark week duty 🛋️',\n  when:    'Fri, 6:00pm till late',\n  note:    'No excuses.',\n} }];\n"
+        "jsCode": "// ===================================================================\n//  DEMO STUB for Google Calendar: Create event.\n// ===================================================================\nreturn [{ json: {\n  created: 'Shark week duty 🛋️',\n  when:    'Fri, 6:00pm till late',\n  note:    'No excuses.',\n} }];\n"
       },
       "name": "Google Calendar: block Friday",
       "type": "n8n-nodes-base.code",
@@ -379,11 +379,11 @@
         3060,
         400
       ],
-      "notes": "FILMING: 2 seconds. The full build fires on a 5:10pm schedule."
+      "notes": "DEMO: 2 seconds. The full build fires on a 5:10pm schedule."
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  FILMING STUB for \"Order Grill'd (Browserless)\" in the full build.\n//  Grill'd has no ordering API, so a headless browser logs into your\n//  Grill'd account, reorders the saved favourite and pays with the\n//  saved card. Pickup, because the courier collects it.\n// ===================================================================\nconst cfg = $('⚙️ Linda settings').first().json;\nreturn [{ json: {\n  store:   cfg.comfort_order.store + ' (closest store)',\n  items:   cfg.comfort_order.items,\n  order:   'pickup, paid, ready in 15 min',\n  for:     cfg.me.name,\n} }];\n"
+        "jsCode": "// ===================================================================\n//  DEMO STUB for \"Order Grill'd (Browserless)\" in the full build.\n//  Grill'd has no ordering API, so a headless browser logs into your\n//  Grill'd account, reorders the saved favourite and pays with the\n//  saved card. Pickup, because the courier collects it.\n// ===================================================================\nconst cfg = $('⚙️ Linda settings').first().json;\nreturn [{ json: {\n  store:   cfg.comfort_order.store + ' (closest store)',\n  items:   cfg.comfort_order.items,\n  order:   'pickup, paid, ready in 15 min',\n  for:     cfg.me.name,\n} }];\n"
       },
       "name": "Order Grill'd (Browserless)",
       "type": "n8n-nodes-base.code",
@@ -395,7 +395,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  FILMING STUB for Uber Direct. Full build: POST\n//  /v1/customers/{id}/deliveries, pickup at Grill'd, drop-off at hers.\n//  Uber Direct's sandbox has a robot courier that walks the delivery\n//  through every status without a real driver.\n// ===================================================================\nconst cfg = $('⚙️ Linda settings').first().json;\nreturn [{ json: {\n  delivery_id:  'del_' + Math.random().toString(36).slice(2, 12),\n  status:       'pending',\n  pickup:       $input.first().json.store,\n  dropoff:      cfg.her.name + \"'s place\",\n  pickup_notes: 'Order under ' + cfg.me.name + ': ' + cfg.comfort_order.items.join(' + '),\n} }];\n"
+        "jsCode": "// ===================================================================\n//  DEMO STUB for Uber Direct. Full build: POST\n//  /v1/customers/{id}/deliveries, pickup at Grill'd, drop-off at hers.\n//  Uber Direct's sandbox has a robot courier that walks the delivery\n//  through every status without a real driver.\n// ===================================================================\nconst cfg = $('⚙️ Linda settings').first().json;\nreturn [{ json: {\n  delivery_id:  'del_' + Math.random().toString(36).slice(2, 12),\n  status:       'pending',\n  pickup:       $input.first().json.store,\n  dropoff:      cfg.her.name + \"'s place\",\n  pickup_notes: 'Order under ' + cfg.me.name + ': ' + cfg.comfort_order.items.join(' + '),\n} }];\n"
       },
       "name": "Uber Direct: book the driver",
       "type": "n8n-nodes-base.code",
@@ -407,7 +407,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  FILMING STUB for the Uber Direct webhook. This is the payload it\n//  posts when the driver picks up: status pickup_complete. In the full\n//  build that event is the trigger for the movie lane.\n// ===================================================================\nreturn [{ json: {\n  kind:        'event.delivery_status',\n  status:      'pickup_complete',\n  delivery_id: $input.first().json.delivery_id,\n  courier:     { name: 'Sam', vehicle_type: 'car' },\n  eta_min:     12,\n} }];\n"
+        "jsCode": "// ===================================================================\n//  DEMO STUB for the Uber Direct webhook. This is the payload it\n//  posts when the driver picks up: status pickup_complete. In the full\n//  build that event is the trigger for the movie lane.\n// ===================================================================\nreturn [{ json: {\n  kind:        'event.delivery_status',\n  status:      'pickup_complete',\n  delivery_id: $input.first().json.delivery_id,\n  courier:     { name: 'Sam', vehicle_type: 'car' },\n  eta_min:     12,\n} }];\n"
       },
       "name": "Uber Direct: driver on the way",
       "type": "n8n-nodes-base.code",
@@ -443,11 +443,14 @@
           "id": "REPLACE_ME",
           "name": "Apify account"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
       "parameters": {
-        "jsCode": "// ===================================================================\n//  Her Netflix history. Netflix has no API, so she downloads Viewing\n//  Activity as a CSV and it lives in a Google Sheet. FILMING STUB:\n//  the rows from that CSV.\n// ===================================================================\nreturn [{ json: {\n  source: 'Netflix > Viewing activity (CSV)',\n  watched: [\n    'Barbie', 'Mean Girls', 'The Proposal', 'Crazy Rich Asians', 'The Devil Wears Prada',\n    'Gilmore Girls: Season 1: Pilot', 'Emily in Paris: Season 4: Got Ghosted',\n    'Bridgerton: Season 3: Out of the Shadows', 'Reminders of Him', 'The Gentlemen',\n  ],\n} }];\n"
+        "jsCode": "// ===================================================================\n//  Her Netflix history. Netflix has no API, so she downloads Viewing\n//  Activity as a CSV and it lives in a Google Sheet. DEMO STUB:\n//  the rows from that CSV.\n// ===================================================================\nreturn [{ json: {\n  source: 'Netflix > Viewing activity (CSV)',\n  watched: [\n    'Barbie', 'Mean Girls', 'The Proposal', 'Crazy Rich Asians', 'The Devil Wears Prada',\n    'Gilmore Girls: Season 1: Pilot', 'Emily in Paris: Season 4: Got Ghosted',\n    'Bridgerton: Season 3: Out of the Shadows', 'Reminders of Him', 'The Gentlemen',\n  ],\n} }];\n"
       },
       "name": "Her Netflix history",
       "type": "n8n-nodes-base.code",
@@ -486,7 +489,10 @@
       "position": [
         4320,
         400
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
       "parameters": {

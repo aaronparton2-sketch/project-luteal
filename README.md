@@ -81,6 +81,14 @@ flowchart TD
 
 ---
 
+## The canvas
+
+<p align="center">
+  <img src="assets/workflow-canvas.png" alt="The full Project Luteal workflow in n8n: 48 nodes across five lanes, every node executed green" width="100%">
+</p>
+
+---
+
 ## Two workflows
 
 | | File | What it is |
@@ -97,6 +105,11 @@ flowchart TD
 | 💐 She replies | Telegram | Closest florist found and emailed the order. Friday boys' night moved a week, the night blocked out |
 | 🍔 5:30pm | 5:10pm | Her Grill'd favourite ordered as a pickup, then an Uber Direct courier booked to her door |
 | 🍿 On the way | Webhook | The driver's "on the way" triggers Apify, her Netflix history, and Linda's three picks |
+
+**Fails safe.** Read-only calls (Apify, her Netflix history, the Uber sign-in, Claude) retry
+three times. Anything that **spends or sends** (the Grill'd order, booking the courier, the
+florist email, every Telegram message) never retries, so a flaky network can't double-order
+her dinner. The florist search gives up in seconds and falls back to your usual florist.
 
 **No database to set up.** Linda remembers her cycle, whether she's replied and which driver is
 yours in n8n's own *workflow static data*. It persists between runs of an active workflow.
@@ -168,14 +181,21 @@ Most automation demos quietly aren't. Here's the honest split.
 
 ## Running it
 
+**You'll need:** a recent n8n (self-hosted or Cloud) with the AI Agent node, and the
+**Apify node** (`@apify/n8n-nodes-apify`). On n8n Cloud it's a verified node, so just search
+"Apify" in the nodes panel. Self-hosted: *Settings → Community nodes → Install* →
+`@apify/n8n-nodes-apify`. Install it **before** importing, or the Apify node comes in as a
+blank "?" node.
+
 1. **Import both workflows** into n8n.
 2. **Connect your credentials**: Telegram, Gmail, Google Calendar, Apify, Anthropic. Every one in
    the files reads `REPLACE_ME`. Nothing real ships in this repo.
 3. **Fill in the ⚙️ Settings nodes.** There's one at the start of each lane (a lane can't read
    another lane's nodes), so fill in all five. Her Telegram chat id: she messages your bot once,
    then read it from `https://api.telegram.org/bot<TOKEN>/getUpdates`.
-4. **Set the three webhooks**: the Shortcut posts to `linda-cycle`, and Uber Direct's webhook
-   (in the Uber Direct dashboard) points at `linda-uber-status`.
+4. **Point the two webhooks**: the Shortcut posts to `linda-cycle`, and Uber Direct's webhook
+   (in the Uber Direct dashboard) points at `linda-uber-status`. Her replies come in through
+   the Telegram trigger, which registers itself when you activate.
 5. **Swap the placeholders**: her work location (it ships pointing at a café on Oxford St,
    Leederville), her home address for the courier, your Grill'd store address, and the Uber
    Direct customer id, client id and secret.
@@ -197,8 +217,4 @@ every field is length-capped.
 
 ---
 
-<p align="center"><sub>MIT. Built by <a href="https://myceliumai.com.au">Mycelium AI</a>. She's not mad. She's just disappointed.</sub></p>
-
----
-
-**Built by [Mycelium AI](https://www.myceliumai.com.au)**, a Perth agency that builds websites, runs Google and Meta ads, and automates the admin for small businesses. Follow the builds on Instagram at [@aaronautomates](https://www.instagram.com/aaronautomates/).
+<p align="center"><sub>MIT. Built by <a href="https://myceliumai.com.au">Mycelium AI</a> in Perth · follow the builds on Instagram at <a href="https://www.instagram.com/aaronautomates/">@aaronautomates</a>.<br>She's not mad. She's just disappointed.</sub></p>
